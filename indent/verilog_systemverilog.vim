@@ -16,7 +16,7 @@ let b:did_indent = 1
 
 setlocal indentexpr=GetVerilogSystemVerilogIndent()
 setlocal indentkeys=!^F,o,O,0),0},=begin,=end,=join,=endcase,=join_any,=join_none
-setlocal indentkeys+==endmodule,=endfunction,=endtask,=endspecify
+setlocal indentkeys+==endfunction,=endtask,=endspecify
 setlocal indentkeys+==endclass,=endpackage,=endsequence,=endclocking
 setlocal indentkeys+==endinterface,=endgroup,=endprogram,=endproperty
 setlocal indentkeys+==endgenerate,=endchecker,=endconfig,=endprimitive,=endtable
@@ -34,8 +34,7 @@ let s:vlog_method         = '^\(\s*pure\s\+virtual\|\s*extern\)\@!.*\<\(function
 let s:vlog_block_start    = '\<\(begin\|case\|^\s*fork\)\>\|{\|('
 let s:vlog_block_end      = '\<\(end\|endcase\|join\(_all\|_none\)\?\)\>\|}\|)'
 
-let s:vlog_module         = '\<\(extern\s\+\)\@<!module\>'
-let s:vlog_interface      = '\(virtual\s\+\)\@<!\<interface\>\s*\(\<class\>\)\@!\w\+.*[^,]$'
+let s:vlog_interface      = '\<interface\>\s*\(\<class\>\)\@!\w\+.*[^,]$'
 let s:vlog_package        = '\<package\>'
 let s:vlog_covergroup     = '\<covergroup\>'
 let s:vlog_program        = '\<program\>'
@@ -48,9 +47,9 @@ let s:vlog_preproc        = '^\s*`ifn\?def\>'
 let s:vlog_case           = '\<case[zx]\?\>\s*('
 let s:vlog_join           = '\<join\(_any\|_none\)\?\>'
 
-let s:vlog_block_decl     = '\(\<\(while\|if\|foreach\|for\)\>\s*(\)\|\<\(else\|do\)\>\|' . s:vlog_always .'\|'. s:vlog_module
+let s:vlog_block_decl     = '\(\<\(while\|if\|foreach\|for\)\>\s*(\)\|\<\(else\|do\)\>\|' . s:vlog_always
 
-let s:vlog_context_end    = '\<end\(package\|function\|class\|module\|group\|generate\|program\|property\|sequence\|interface\|task\)\>\|`endif\>'
+let s:vlog_context_end    = '\<end\(package\|function\|class\|group\|generate\|program\|property\|sequence\|interface\|task\)\>\|`endif\>'
 
 let s:vlog_assign         = '\([^=!]=\([^=]\|$\)\|return\||[-=]>\)'
 let s:vlog_conditional    = '?.*:.*$'
@@ -116,8 +115,6 @@ function! GetVerilogSystemVerilogIndent()
       return indent(s:SearchBackForPattern('\<specify\>'   , v:lnum))
     elseif s:curr_line =~ '^\s*\<endsequence\>'
       return indent(s:SearchBackForPattern('\<sequence\>'  , v:lnum))
-    elseif s:curr_line =~ '^\s*\<endmodule\>'
-      return indent(s:SearchForBlockStart('\<module\>', '', '\<endmodule\>', v:lnum, 0))
     elseif s:curr_line =~ '^\s*\<endclass\>'
       return indent(s:SearchForBlockStart('\<class\>' , '', '\<endclass\>' , v:lnum, 0))
     elseif s:curr_line =~ '^\s*\<end\>'
@@ -349,9 +346,7 @@ function! s:GetContextIndent()
       return indent(l:lnum)
     endif
 
-    if l:line =~ s:vlog_module
-      return s:GetContextStartIndent("module"    , l:lnum) + l:open_offset
-    elseif l:line =~ s:vlog_interface
+    if l:line =~ s:vlog_interface
       return s:GetContextStartIndent("interface" , l:lnum) + l:open_offset
     elseif l:line =~ s:vlog_class
       return s:GetContextStartIndent("class"     , l:lnum) + l:open_offset
